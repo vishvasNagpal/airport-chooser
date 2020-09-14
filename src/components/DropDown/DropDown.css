@@ -1,0 +1,53 @@
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.select {
+  padding: 10px;
+  font-size: 14px;
+}
+.search {
+  padding: 10px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.dropdown {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+
+  border: 1px solid #898989;
+}
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #898989;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+div.list-item:nth-child(even){
+  background-color: #eeeeee;
+}
+.cell {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+.cell.right {
+  text-align: right;
+}
+.pagination {
+  display: flex;
+  padding: 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+.buttonGroup button{
+  padding: 5px 10px;
+  margin-left: 10px;
+}
