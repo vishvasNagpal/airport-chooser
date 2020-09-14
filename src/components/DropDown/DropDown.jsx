@@ -7,6 +7,7 @@ class DropDown extends React.Component {
     super(props);
     this.state = {
       showList: false,
+      showContainer: false,
       rawData: data,
       filteredData: data,
       list: data.slice(0, 10),
@@ -18,14 +19,22 @@ class DropDown extends React.Component {
     }
   }
   componentDidMount() {
-    // this.pagination();
+    // this.showLoader();
   }
   toggleList = () => {
-    this.setState(oldState => (
-      {showList: !oldState.showList}
-    ))
+    this.setState(oldState => {
+      if(!oldState.showList){
+        this.showLoader();
+      }
+      return {
+        showList: !oldState.showList,
+        showContainer: !oldState.showContainer,
+        filteredData: data
+      }
+    });
+
   }
-  filterList = (e) => {
+  filterList = (e) => { // filter the list on changing input text in input box
     let text = e.target.value;
     const {rawData, size} = this.state;
     if(text.length > 0) {
@@ -53,7 +62,6 @@ class DropDown extends React.Component {
         prev: false,
       });
       if(filteredData.length <= 10) {
-        debugger
         this.setState({
           next: false,
           prev: false
@@ -66,15 +74,13 @@ class DropDown extends React.Component {
         current: 1
       });
     }
+    this.showLoader();
   }
-  pagination = (e) => {
+  pagination = (e) => { // handle pagination
     const action = e.target.name;
-
     const {filteredData, current, size, next, prev} = this.state;
-    console.log(filteredData)
     if(action === "next" && next) {
       const nextIndex = current + 1;
-      debugger
       if (Math.abs((current * size) - filteredData.length) <= 10){
         this.setState({next: false})
       }
@@ -83,8 +89,6 @@ class DropDown extends React.Component {
         prev: true,
         current: nextIndex
       });
-      // if (Math.floor(filteredData.length / size) + 1 <= nextIndex){
-
     }
 
     if(action === "prev" && prev) {
@@ -93,11 +97,24 @@ class DropDown extends React.Component {
         list: filteredData.slice(size * (prevIndex -1), size * (current -1)),
         next: true,
         current: prevIndex
-      })
+      });
       if (prevIndex <= 1){
         this.setState({prev: false})
       }
     }
+
+  }
+  showLoader = () => { // showing loading for 1 second, assuming that getting data from api
+    this.setState({
+      loading: true,
+      showList: false
+    });
+    setTimeout(() => {
+      this.setState({
+        loading: false,
+        showList: true
+      });
+    }, 1000)
   }
   selectItem = (selected) => {
     this.setState({
@@ -105,7 +122,7 @@ class DropDown extends React.Component {
     })
   }
   render() {
-    const {showList, list, size, current, filteredData, prev, next, selected} = this.state;
+    const {showList, list, size, current, filteredData, prev, next, selected, loading, showContainer} = this.state;
     return (
       <div className="container">
         <div className="header">
@@ -113,44 +130,57 @@ class DropDown extends React.Component {
           <span>{selected && selected.name}</span>
         </div>
         <div className="dropdown">
-          <button className="select" onClick={this.toggleList}>Select Airport</button>
+          <button className="select" onClick={this.toggleList}>
+            {showList ? "Hide Airport List" : "Show Airport List"}
+          </button>
           {
-            showList &&
+            loading &&
+              <div className="loading">Loading...</div>
+          }
+
+          {
+            showContainer &&
               <>
                 <input className="search" type="text" placeholder="Search Airport" onChange={this.filterList}/>
-                <div className="list">
-                  {
-                    list.map((i, idx) => (
-                      <div
-                        className="list-item"
-                        key={`${idx}_${i.code}`}
-                        onClick={() => this.selectItem(i)}
-                      >
-                        <div className="cell">
-                          <span>{i.name}</span>
-                          <span>{i.code}</span>
-                        </div>
-                        <div className="cell right">
-                          <span>{i.city}</span>
-                          <span>{i.country}</span>
-                        </div>
-                      </div>
-                    ))
-                  }
-                </div>
-                {
-                  filteredData.length > 0 ?
-                    <div className="pagination">
-                      <div>
-                        {`${(current-1)*size + 1} to ${next ? size * current : filteredData.length } of ${filteredData.length}`}
-                      </div>
-                      <div className="buttonGroup">
-                        <button name="prev" disabled={!prev} onClick={this.pagination}>prev</button>
-                        <button name="next" disabled={!next} onClick={this.pagination}>next</button>
-                      </div>
-                    </div> :
-                    <div>No results found!</div>
-                }
+              {
+                showList &&
+                  <div>
+                    <div className="list">
+                      {
+                        list.map((i, idx) => (
+                          <div
+                            className="list-item"
+                            key={`${idx}_${i.code}`}
+                            onClick={() => this.selectItem(i)}
+                          >
+                            <div className="cell">
+                              <span>{i.name}</span>
+                              <span>{i.code}</span>
+                            </div>
+                            <div className="cell right">
+                              <span>{i.city}</span>
+                              <span>{i.country}</span>
+                            </div>
+                          </div>
+                        ))
+                      }
+                    </div>
+                    {
+                      filteredData.length > 0 ?
+                        <div className="pagination">
+                          <div>
+                            {`${(current-1)*size + 1} to ${next ? size * current : filteredData.length } of ${filteredData.length}`}
+                          </div>
+                          <div className="buttonGroup">
+                            <button name="prev" disabled={!prev} onClick={this.pagination}>prev</button>
+                            <button name="next" disabled={!next} onClick={this.pagination}>next</button>
+                          </div>
+                        </div> :
+                        <div className="noResult">No results found!</div>
+                    }
+                  </div>
+              }
+
 
               </>
           }
